@@ -1,16 +1,16 @@
 package main
 
 import (
-	"log"
-	"net/http"
-	"test/db"
-	"test/payments"
+    "grid/go-payments/db"
+    "grid/go-payments/models"
+    "grid/go-payments/routes"
+    "log"
+    "net/http"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/render"
-
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+    "github.com/go-chi/chi"
+    "github.com/go-chi/chi/middleware"
+    "github.com/go-chi/render"
+    _ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 //https://itnext.io/structuring-a-production-grade-rest-api-in-golang-c0229b3feedc
@@ -21,41 +21,41 @@ import (
 //http://gorm.io/docs/sql_builder.html#content-inner
 //https://dev.to/aspittel/how-i-built-an-api-with-mux-go-postgresql-and-gorm-5ah8
 func Routes() *chi.Mux {
-	router := chi.NewRouter()
-	router.Use(
-		render.SetContentType(render.ContentTypeJSON), // Set content-Type headers as application/json
-		//middleware.Logger,                             // Log API request calls
-		middleware.DefaultCompress,                    // Compress results, mostly gzipping assets and json
-		middleware.RedirectSlashes,                    // Redirect slashes to no slash URL versions
-		middleware.Recoverer,                          // Recover from panics without crashing server
-	)
+    router := chi.NewRouter()
+    router.Use(
+        render.SetContentType(render.ContentTypeJSON), // Set content-Type headers as application/json
+        middleware.Logger,                             // Log API request calls
+        middleware.DefaultCompress,                    // Compress results, mostly gzipping assets and json
+        middleware.RedirectSlashes,                    // Redirect slashes to no slash URL versions
+        middleware.Recoverer,                          // Recover from panics without crashing server
+    )
 
-	router.Route("/v1", func(r chi.Router) {
-		r.Mount("/api/payments", payments.Routes())
-	})
+    router.Route("/v1", func(r chi.Router) {
+        r.Mount("/api/payments", routes.PaymentsRoutes())
+    })
 
-	return router
+    return router
 }
 
 func main() {
-	router := Routes()
+    router := Routes()
 
-	if err1 := db.Open(); err1 != nil {
-		panic("failed to connect database")
-	}
+    if err1 := db.Open(); err1 != nil {
+        panic("failed to connect database")
+    }
 
-	defer db.Close()
+    defer db.Close()
 
-	db.DB.AutoMigrate(&payments.PaymentDto{})
+    db.DB.AutoMigrate(&models.PaymentDto{})
 
-	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
-		log.Printf("%s %s\n", method, route) // Walk and print out all routes
-		return nil
-	}
+    walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+        log.Printf("%s %s\n", method, route) // Walk and print out all routes
+        return nil
+    }
 
-	if err := chi.Walk(router, walkFunc); err != nil {
-		log.Panicf("Logging err: %s\n", err.Error()) // panic if there is an error
-	}
+    if err := chi.Walk(router, walkFunc); err != nil {
+        log.Panicf("Logging err: %s\n", err.Error()) // panic if there is an error
+    }
 
-	log.Fatal(http.ListenAndServe(":8080", router)) // Note, the port is usually gotten from the environment.
+    log.Fatal(http.ListenAndServe(":8080", router)) // Note, the port is usually gotten from the environment.
 }
