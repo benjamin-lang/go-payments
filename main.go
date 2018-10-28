@@ -20,6 +20,7 @@ import (
 //https://outcrawl.com/go-microservices-cqrs-docker/
 //http://gorm.io/docs/sql_builder.html#content-inner
 //https://dev.to/aspittel/how-i-built-an-api-with-mux-go-postgresql-and-gorm-5ah8
+//https://www.sohamkamani.com/blog/2017/09/13/how-to-build-a-web-application-in-golang/
 func Routes() *chi.Mux {
     router := chi.NewRouter()
     router.Use(
@@ -32,6 +33,7 @@ func Routes() *chi.Mux {
 
     router.Route("/v1", func(r chi.Router) {
         r.Mount("/api/payments", routes.PaymentsRoutes())
+        r.Mount("/api/imports", routes.ImportsRoutes())
     })
 
     return router
