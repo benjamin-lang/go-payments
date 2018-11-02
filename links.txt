@@ -1,0 +1,8 @@
+//https://itnext.io/structuring-a-production-grade-rest-api-in-golang-c0229b3feedc
+//https://hackernoon.com/golang-clean-archithecture-efd6d7c43047
+//https://flaviocopes.com/golang-tutorial-rest-api/
+//https://medium.com/@eminetto/clean-architecture-using-golang-b63587aa5e3f
+//https://outcrawl.com/go-microservices-cqrs-docker/
+//http://gorm.io/docs/sql_builder.html#content-inner
+//https://dev.to/aspittel/how-i-built-an-api-with-mux-go-postgresql-and-gorm-5ah8
+//https://www.sohamkamani.com/blog/2017/09/13/how-to-build-a-web-application-in-golang/

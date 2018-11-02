@@ -1,6 +1,8 @@
 package db
 
-import "github.com/jinzhu/gorm"
+import (
+    "github.com/jinzhu/gorm"
+)
 
 var DB *gorm.DB
 
@@ -14,6 +16,10 @@ func Open() error {
             "password=2wgQu7CGXMvVlGvcgPO1p72vnZPSkMNaA9nnCNNTLvFhLo "+
             "dbname=payments "+
             "sslmode=disable")
+
+    DB.DB().SetMaxOpenConns(8)
+    DB.DB().SetMaxIdleConns(2)
+    DB.DB().SetConnMaxLifetime(0)
 
     return err
 }

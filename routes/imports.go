@@ -1,7 +1,6 @@
 package routes
 
 import (
-    "fmt"
     "net/http"
     "os"
     "time"
@@ -10,6 +9,7 @@ import (
     "github.com/gocarina/gocsv"
     "github.com/google/uuid"
     "github.com/marcsantiago/StringToFloat"
+    log "github.com/sirupsen/logrus"
     "grid/go-payments/db"
     "grid/go-payments/models"
 )
@@ -26,11 +26,11 @@ type PaymentCSV struct {
 
 func ImportsRoutes() *chi.Mux {
     router := chi.NewRouter()
-    router.Post("/", DoImpport)
+    router.Post("/", ImportCSV)
     return router
 }
 
-func DoImpport(w http.ResponseWriter, r *http.Request) {
+func ImportCSV(w http.ResponseWriter, r *http.Request) {
     paymentsFile, err := os.OpenFile("F:/workspace/go/src/grid/go-payments/events.csv", os.O_RDWR, os.ModePerm)
     if err != nil {
         panic(err)
@@ -44,8 +44,6 @@ func DoImpport(w http.ResponseWriter, r *http.Request) {
     }
 
     for _, payment := range payments {
-        fmt.Println("Read payment: ", payment)
-
         value, err := stringtofloat.Convert(payment.Content)
         if err != nil {
             panic(err)
@@ -59,8 +57,10 @@ func DoImpport(w http.ResponseWriter, r *http.Request) {
             Value:        value,
             Note:         payment.Description}
 
-        db.DB.Save(&paymentDto)
+        go db.DB.Save(&paymentDto)
     }
+
+    log.Infof("%v payments imported from csv", len(payments))
 }
 
 type DateTime struct {
