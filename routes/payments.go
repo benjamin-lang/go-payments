@@ -6,7 +6,6 @@ import (
     "strconv"
     "time"
 
-    log "github.com/sirupsen/logrus"
     "github.com/go-chi/chi"
     "github.com/google/uuid"
     "grid/go-payments/db"
@@ -64,10 +63,10 @@ func getPaymentsSince(token *models.ContinuationToken, pageSize int, w http.Resp
 
     if len(payments) == pageSize {
         nextToken := models.TokenFromPaymentDto(payments[pageSize-1])
-        page = models.PageDTO{HasNext: true, ContinuationToken: nextToken, Payments: payments, NextPageUrl: models.UrlParamFromToken(nextToken, r.URL)}
-        log.Info(r.URL)
+        page = models.PageDTO{TotalCount: count, HasNext: true, ContinuationToken: nextToken, Payments: payments,
+        NextPageUrl: models.UrlParamFromToken(nextToken, r.URL)}
     }
-
+    
     middleware.RespondWithJSON(w, http.StatusOK, &page)
 }
 

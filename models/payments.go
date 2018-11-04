@@ -23,8 +23,8 @@ type PaymentDto struct {
 }
 
 type ContinuationToken struct {
-    Timestamp time.Time
     Id        uuid.UUID
+    Timestamp time.Time
 }
 
 type PageDTO struct {
@@ -43,14 +43,14 @@ func TokenFromString(tokenStr string) *ContinuationToken {
         return nil
     }
 
-    timestamp, parseTimeError := time.Parse(time.RFC3339, parts[0])
-    id, parseIdError := uuid.Parse(parts[1])
+    id, parseIdError := uuid.Parse(parts[0])
+    timestamp, parseTimeError := time.Parse(time.RFC3339, parts[1])
 
     if parseTimeError != nil || parseIdError != nil {
         return nil
     }
 
-    token := ContinuationToken{Timestamp: timestamp, Id: id}
+    token := ContinuationToken{Id: id, Timestamp: timestamp}
 
     return &token
 }
@@ -71,7 +71,7 @@ func UrlParamFromToken(token *ContinuationToken, requestUrl *url.URL) *string {
     var nextPageUrl = *requestUrl
     query := nextPageUrl.Query()
     query.Del("continuationToken")
-    query.Add("continuationToken", token.Timestamp.Format(time.RFC3339)+"_"+token.Id.String())
+    query.Add("continuationToken",  token.Id.String() + "_" +token.Timestamp.Format(time.RFC3339))
     nextPageUrl.RawQuery = query.Encode()
 
     urlStr := nextPageUrl.String()
