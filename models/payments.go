@@ -35,6 +35,12 @@ type PageDTO struct {
     Payments          []PaymentDto
 }
 
+type StatsDto struct {
+    SpendingsSum float64
+    SpendingsByCatSum map[PaymentCategory]float64
+    SpendingsByCatPercent map[PaymentCategory]float64
+}
+
 func TokenFromString(tokenStr string) *ContinuationToken {
 
     parts := strings.Split(tokenStr, "_")

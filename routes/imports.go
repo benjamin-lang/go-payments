@@ -4,11 +4,12 @@ import (
     "net/http"
     "os"
     "time"
+    "strconv"
+    "strings"
 
     "github.com/go-chi/chi"
     "github.com/gocarina/gocsv"
     "github.com/google/uuid"
-    "github.com/marcsantiago/StringToFloat"
     log "github.com/sirupsen/logrus"
     "grid/go-payments/db"
     "grid/go-payments/models"
@@ -44,7 +45,7 @@ func ImportCSV(w http.ResponseWriter, r *http.Request) {
     }
 
     for _, payment := range payments {
-        value, err := stringtofloat.Convert(payment.Content)
+        value, err := strconv.ParseFloat(normalizeEurope(payment.Content), 64)
         if err != nil {
             panic(err)
         }
@@ -71,4 +72,11 @@ type DateTime struct {
 func (date *DateTime) UnmarshalCSV(csv string) (err error) {
     date.Time, err = time.Parse("2006-01-02", csv)
     return err
+}
+
+func normalizeEurope(old string) string {
+	count := strings.Count(old, ".")
+	s := strings.Replace(old, ",", ".", -1)
+	return strings.Replace(s, ".", "", count)
+
 }

@@ -5,6 +5,7 @@ import (
     "net/http"
     "strconv"
     "time"
+    "math"
 
     "github.com/go-chi/chi"
     "github.com/google/uuid"
@@ -20,6 +21,7 @@ func PaymentsRoutes() *chi.Mux {
     router.Delete("/", DeleteAll)
     router.Get("/count", GetCount)
     router.Get("/{paymentId}", GetAPayment)
+    router.Get("/{payments/stats}", GetPaymentStats)
     router.Put("/{paymentId}", CreatePaymentWithId)
     return router
 }
@@ -66,7 +68,7 @@ func getPaymentsSince(token *models.ContinuationToken, pageSize int, w http.Resp
         page = models.PageDTO{TotalCount: count, HasNext: true, ContinuationToken: nextToken, Payments: payments,
         NextPageUrl: models.UrlParamFromToken(nextToken, r.URL)}
     }
-    
+
     middleware.RespondWithJSON(w, http.StatusOK, &page)
 }
 
@@ -92,6 +94,35 @@ func GetPayments(w http.ResponseWriter, r *http.Request) {
     var payments []models.PaymentDto
     db.DB.Order("date_occurred asc").Order("id asc").Find(&payments)
     middleware.RespondWithJSON(w, http.StatusOK, &payments)
+}
+
+func GetPaymentStats(w http.ResponseWriter, r *http.Request) {
+    var payments []models.PaymentDto
+    db.DB.Where("date_occurred >= '2018-01-01' AND date_occurred < '2019-01-01'").Order("date_occurred asc").Order("id asc").Find(&payments)
+
+    stats := new(models.StatsDto)
+    stats.SpendingsByCatSum = make(map[models.PaymentCategory]float64, 0)
+    stats.SpendingsByCatPercent = make(map[models.PaymentCategory]float64, 0)
+
+    for _, payment := range payments {
+          if "DEBT" == payment.Type {
+              stats.SpendingsSum += payment.Value
+              stats.SpendingsByCatSum[payment.Category] += payment.Value
+              stats.SpendingsByCatPercent[payment.Category] += payment.Value
+          }
+    }
+
+    for category, debtByCategorySum := range stats.SpendingsByCatPercent {
+        stats.SpendingsByCatPercent[category] = math.Round( debtByCategorySum / stats.SpendingsSum * 100) / 100
+    }
+
+    for category, debtByCategorySum := range stats.SpendingsByCatSum {
+        stats.SpendingsByCatSum[category] = math.Round( debtByCategorySum * 100) / 100
+    }
+
+    stats.SpendingsSum = math.Round( stats.SpendingsSum * 100) / 100
+
+    middleware.RespondWithJSON(w, http.StatusOK, &stats)
 }
 
 func GetCount(w http.ResponseWriter, r *http.Request) {
