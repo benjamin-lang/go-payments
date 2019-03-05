@@ -1,5 +1,7 @@
 pipeline {
-    agent none
+    agent {
+        label 'docker'
+    }
 
     environment {
         SERVICE_VERSION = VersionNumber(projectStartDate: '2019-01-01', worstResultForIncrement: 'SUCCESS'
@@ -32,12 +34,6 @@ pipeline {
             steps {
                 git(url: SCM_URL, credentialsId: 'jenkins_ssh_credentials', branch: '$BRANCH_NAME')
             }
-        }
-    }
-
-    post {
-        always {
-            cleanWs()
         }
     }
 }
