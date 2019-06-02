@@ -1,5 +1,5 @@
 # STEP 1 build executable binary
-FROM golang:1.11.1-alpine3.8 as builder
+FROM golang:1.12.5-alpine3.9 as builder
 
 ARG BUILD_ID
 LABEL stage=builder
@@ -19,7 +19,7 @@ RUN go get -d -v \
 # STEP 2 build a small runtime image
 
 # start from scratch
-FROM scratch
+FROM golang:1.12.5-alpine3.9
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
