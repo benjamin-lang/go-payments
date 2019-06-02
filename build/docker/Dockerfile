@@ -1,5 +1,4 @@
 # STEP 1 build executable binary
-
 FROM golang:1.11.1-alpine3.8 as builder
 
 ARG BUILD_ID
@@ -10,7 +9,7 @@ LABEL build=$BUILD_ID
 RUN apk add --update --no-cache git ca-certificates \
     && adduser -D -g '' appuser
 
-COPY src $GOPATH/src/grid/go-payments/
+COPY . $GOPATH/src/grid/go-payments/
 WORKDIR $GOPATH/src/grid/go-payments/
 
 #get app dependencies and build the binary
