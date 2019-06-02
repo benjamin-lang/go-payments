@@ -19,7 +19,7 @@ RUN go get -d -v \
 # STEP 2 build a small runtime image
 
 # start from scratch
-FROM alpine:3.9 as prod_img
+FROM alpine:3.9
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
