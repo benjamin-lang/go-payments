@@ -1,10 +1,13 @@
 package main
 
 import (
+    "encoding/csv"
+    "io"
     "net/http"
     "os"
 
     "github.com/go-chi/cors"
+    "github.com/gocarina/gocsv"
     log "github.com/sirupsen/logrus"
     "grid/go-payments/db"
     "grid/go-payments/models"
@@ -72,6 +75,12 @@ func main() {
     if err := chi.Walk(router, walkFunc); err != nil {
         log.Panicf("Logging err: %s\n", err.Error()) // panic if there is an error
     }
+
+    gocsv.SetCSVReader(func(in io.Reader) gocsv.CSVReader {
+        r := csv.NewReader(in)
+        r.Comma = ';'
+        return r // Allows use pipe as delimiter
+    })
 
     log.Fatal(http.ListenAndServe(":8080", router)) // Note, the port is usually gotten from the environment.
 }

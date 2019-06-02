@@ -2,12 +2,16 @@
 
 FROM golang:1.11.1-alpine3.8 as builder
 
+ARG BUILD_ID
+LABEL stage=builder
+LABEL build=$BUILD_ID
+
 # Install SSL ca certificates & create user
 RUN apk add --update --no-cache git ca-certificates \
     && adduser -D -g '' appuser
 
-COPY src $GOPATH/src/smartinsurtech.de/echo-adapter/
-WORKDIR $GOPATH/src/smartinsurtech.de/echo-adapter/
+COPY src $GOPATH/src/grid/go-payments/
+WORKDIR $GOPATH/src/grid/go-payments/
 
 #get app dependencies and build the binary
 RUN go get -d -v \

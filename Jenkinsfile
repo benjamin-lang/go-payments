@@ -1,13 +1,16 @@
+#!groovy​
+
 pipeline {
     agent {
-        label 'docker'
+        node 'docker'
     }
 
     environment {
         SERVICE_VERSION = VersionNumber(projectStartDate: '2019-01-01', worstResultForIncrement: 'SUCCESS'
-            , versionNumberString: '${BUILD_DATE_FORMATTED,"yyyyMMdd"}-r${BUILDS_TODAY, XX}', versionPrefix: '')
-        SERVICE_NAME = 'go-payments'
+                , versionNumberString: '${BUILD_DATE_FORMATTED,"yyyyMMdd"}-r${BUILDS_TODAY, XX}', versionPrefix: '')
+        SERVICE_NAME = 'payment-service-go'
         SCM_URL = 'git@github.com:benjamin-lang/go-payments.git'
+        DOCKER_REGISTRY = 'springfield:5000'
     }
 
     options {
@@ -32,8 +35,22 @@ pipeline {
         }
         stage('ssh checkout') {
             steps {
-                git(url: SCM_URL, credentialsId: 'jenkins_ssh_credentials', branch: '$BRANCH_NAME')
+                git(url: SCM_URL, credentialsId: 'jenkins_github_credentials', branch: '$BRANCH_NAME')
             }
+        }
+        stage('docker') {
+            steps {
+                script {
+                    docker.build("$DOCKER_REGISTRY/$SERVICE_NAME:$SERVICE_VERSION", "--build-arg BUILD_ID=$BUILD_ID -f ./build/docker/Dockerfile .")
+                    sh 'docker image prune -f --filter label=stage=builder --filter label=build=$BUILD_ID'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
         }
     }
 }
