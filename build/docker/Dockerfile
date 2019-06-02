@@ -14,12 +14,12 @@ WORKDIR $GOPATH/src/grid/go-payments/
 
 #get app dependencies and build the binary
 RUN go get -d -v \
-    && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags='-w -s' -o /go/bin/main
+    && GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o  /go/bin/main
 
 # STEP 2 build a small runtime image
 
 # start from scratch
-FROM golang:1.12.5-alpine3.9
+FROM alpine:3.9 as prod_img
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
